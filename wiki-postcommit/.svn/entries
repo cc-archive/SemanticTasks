@@ -1,0 +1,68 @@
+8
+
+dir
+211
+http://freeculture.org:8080/svn/wiki-postcommit
+http://freeculture.org:8080/svn
+
+
+
+2008-02-24T23:34:02.929549Z
+184
+paulproteus
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+d913d297-888f-437f-8146-69172ca65498
+
+python
+dir
+
+receive_emails.py
+file
+
+
+
+
+2008-04-11T21:15:10.000000Z
+69d45b1111ea3a588154761cf8d74cad
+2008-02-24T23:04:51.256859Z
+178
+paulproteus
+has-props
+
+email_generator.py
+file
+
+
+
+
+2008-04-11T21:15:10.000000Z
+36ab89c52523151614d87f0c96677bc2
+2008-02-24T21:22:34.664998Z
+171
+paulproteus
+
+wikipostcommit.php
+file
+
+
+
+
+2008-04-11T21:15:10.000000Z
+06a6f988d8685d81856eb6ef510d39de
+2008-02-24T23:34:02.929549Z
+184
+paulproteus
+
