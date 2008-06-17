@@ -50,11 +50,13 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
         $assignee_name = $assignee_user_name[1];
         $body = "Hello $assignee_name, \nThe task \"$title\" $message.\n\n$link";
 
-
         $assignee = User::newFromName($assignee_name);
-        $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
 
-        $user_mailer->send( $assignee_mail, $from, $subject, $body );
+        if ($assignee->getID() != $user->getID())
+        {
+            $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
+            $user_mailer->send( $assignee_mail, $from, $subject, $body );
+        }
     }
 
     return TRUE;
@@ -138,8 +140,8 @@ function st_get_tasks_to_remind(&$today)
 */
 ##########################################
 
-
-$wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';
 $wgHooks['ArticleInsertComplete'][] = 'fnMailAssignees_new_task';
+$wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';
+
 
 ?>
