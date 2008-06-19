@@ -35,7 +35,8 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
     */
     $link = $title->getFullURL();
 
-    $results = st_get_assignees_to_notify($title);
+    $query_string = "[[$title]][[assigned to::*]]";
+    $results = st_get_query_results($query_string);
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
@@ -52,7 +53,11 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
 
         $assignee = User::newFromName($assignee_name);
 
-        if ($assignee->getID() != $user->getID())
+##############################################
+#######TODO : A CHANGER DANS LA VERSION FINALE
+##############################################
+
+        if ($assignee->getID() == $user->getID())
         {
             $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
             $user_mailer->send( $assignee_mail, $from, $subject, $body );
@@ -62,7 +67,7 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
     return TRUE;
 }
 
-function st_get_assignees_to_notify(&$tasktitle)
+function st_get_query_results(&$query_string)
 {
     //We use the Semantic Media Wiki Processor
     global $smwgIP;
@@ -70,7 +75,6 @@ function st_get_assignees_to_notify(&$tasktitle)
 
     $task_assignees = array();
 
-    $query_string = "[[$tasktitle]][[assigned to::*]]";
     $params = array();
     $inline = true;
     $format = 'auto';
@@ -83,7 +87,7 @@ function st_get_assignees_to_notify(&$tasktitle)
     return $results;
 }
 
-/*
+//*
 ##########################################
 //Here is for email reminders
 
@@ -92,7 +96,8 @@ function fnRemindAssignees($pre_title, $message)
     $t = getdate();
     $today = date('F d Y',$t[0]);
 
-    $results = st_get_tasks_to_remind($today);
+    $query_string = "[[reminder at::+]][[Target date::> $today]][[Assigned to::*]][[Reminder at::*]][[Target date::*]]";
+    $results = st_get_query_results($query_string);
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
@@ -115,29 +120,8 @@ function fnRemindAssignees($pre_title, $message)
     return TRUE;
 }
 
-
-function st_get_tasks_to_remind(&$today)
-{
-    //We use the Semantic Media Wiki Processor
-    global $smwgIP;
-    include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
-
-    $task_assignees = array();
-
-    $query_string = "[[reminder at::+]][[Target date::> $today]][[Assigned to::*]][[Reminder at::*]][[Target date::*]]";
-    $params = array();
-    $inline = true;
-    $format = 'auto';
-    $printlabel = "";        
-    $printouts[] = new SMWPrintRequest(SMW_PRINT_THIS, $printlabel);
-
-    $query  = SMWQueryProcessor::createQuery($query_string, $params, $inline, $format, $printouts);        
-    $results = smwfGetStore()->getQueryResult($query);
-
-    return $results;
-}
 //end of email reminders
-*/
+//*/
 ##########################################
 
 $wgHooks['ArticleInsertComplete'][] = 'fnMailAssignees_new_task';
