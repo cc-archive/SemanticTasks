@@ -1,22 +1,21 @@
 == About ==
 
-Semantic Drilldown is an extension to MediaWiki that works in
-conjunction with another extension, Semantic MediaWiki, to provide
-a drilldown interface for all the data on a site.
-For more information on Semantic Drilldown, see the extension
-homepage at
-http://www.mediawiki.org/wiki/Extension:Semantic_Drilldown
+Semantic Tasks is an extension to MediaWiki that works in conjunction with another extension, Semantic MediaWiki, to provide email task notifications and reminders.
 
-Notes on installing Semantic Drilldown can be found in the file INSTALL.
+Notes on installing Semantic tasks can be found in the file INSTALL.
 
 == Credits ==
 
-Semantic Drilldown was written by Yaron Koren.
+Semantic Tasks was written by Steren Giannini.
 
-Language translations were provided by many people; see the
-file /languages/SD_Messages.php for the full listing.
+== Manual ==
+
+* Notification emails are sent when a task is created or updated. The system looks for the [[Assigned to::*]] property.
+
+* Reminders emails. The system looks for the [[Reminder at::*]] and the [[Target date::*]] property. It then send reminders to the assignees.
+You must run a cron job once a day to execute the reminder script :
+php extensions/SemanticTasks/ST_CheckForReminders.php
 
 == Contact ==
 
-Most comments, questions, suggestions and bug reports should be
-sent to Yaron at yaron57@gmail.com.
+For comments, questions, suggestions or bug reports please contact http://creativecommons.org/contact/
