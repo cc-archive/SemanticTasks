@@ -46,10 +46,6 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
 
         $assignee = User::newFromName($assignee_name);
 
-##############################################
-#######TODO : CHANGER != en == pour tester
-##############################################
-
         if ($assignee->getID() != $user->getID())
         {
             $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);

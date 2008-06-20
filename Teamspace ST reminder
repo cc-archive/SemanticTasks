@@ -10,5 +10,9 @@ Here are things to add to the current teamspace structure :
 
 
 *In the Form:Task 
+    __NOTOC__
+
+and
+
     = Reminders =
         <p><strong>Remind me </strong> {{{field|reminder|default=20,15,7,3}}} days before Target date</p>
