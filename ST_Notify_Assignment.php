@@ -84,27 +84,27 @@ function fnRemindAssignees()
     $t = getdate();
     $today = date('F d Y',$t[0]);
 
-    $subject = "[Teamspace] Reminder: ";
-
-    $query_string = "[[reminder at::+]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
+    $query_string = "[[Reminder at::+]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
+
+    $sender = new MailAddress("no-reply@creativecommons.org","Teamspace");
 
     while ($row = $results->getNext())
     {
         $task_name = $row[0]->getNextObject()->getTitle();
-        $subject .= $task_name;
+        $subject = "[Teamspace] Reminder: $task_name";
         $link = $task_name->getFullURL();
 
         $target_date = $row[3]->getNextObject();
-        $date = new DateTime($target_date->getShortHTMLText());
-        $date_today = new DateTime($today);
+        $tg_date = new DateTime($target_date->getShortHTMLText());
 
         while ($reminder = $row[1]->getNextObject())
         {
             $remind_me_in = $reminder->getShortHTMLText();
-            $date_today->modify("+$remind_me_in day");
+            $date = new DateTime($today);
+            $date->modify("+$remind_me_in day");
 
-            if($date == $date_today)
+            if($tg_date == $date)
             {
                 while ($task_assignee = $row[2]->getNextObject())
                 {
@@ -115,7 +115,7 @@ function fnRemindAssignees()
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
                     $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link";
-                    $user_mailer->send( $assignee_mail, $assignee_mail, $subject, $body );
+                    $user_mailer->send( $assignee_mail, $sender, $subject, $body );
                 }        
             }            
         }
