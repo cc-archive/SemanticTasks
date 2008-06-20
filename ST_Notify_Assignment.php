@@ -11,14 +11,6 @@ function fnMailAssignees_new_task(&$article, &$user, &$text, &$summary, &$minore
 function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
     fnMailAssignees(&$article, $user,'[Teamspace] Task updated:','has just been updated');
-
-###########
-//*
-//Here starts the test for mail reminders 
-    fnRemindAssignees();
-//*/
-###########
-
     return TRUE;
 }
 
@@ -88,9 +80,6 @@ function st_get_query_results(&$query_string)
     return $results;
 }
 
-//*
-##########################################
-//Here is for email reminders
 
 function fnRemindAssignees()
 {
@@ -137,10 +126,6 @@ function fnRemindAssignees()
     }
     return TRUE;
 }
-
-//end of email reminders
-//*/
-##########################################
 
 $wgHooks['ArticleInsertComplete'][] = 'fnMailAssignees_new_task';
 $wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';

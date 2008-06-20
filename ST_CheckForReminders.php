@@ -1,5 +1,6 @@
 <?php
-print("Begin ST check for reminders\n");
+# (C) 2008 Steren Giannini
+# Licensed under the GNU GPLv2 (or later).
 
 $IP = realpath( dirname( __FILE__ ) . "/../..");
 require_once( "$IP/maintenance/commandLine.inc" );
@@ -13,5 +14,5 @@ require_once($stIP . '/ST_Notify_Assignment.php');
 //Let's send reminders
 fnRemindAssignees();
 
-print("End ST check for reminders\n");
+print("ST check for reminders\n");
 ?>
