@@ -9,7 +9,7 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
     if($rev == 1)
     {
-        fnMailAssignees(&$article, $user,'[Teamspace] New task:',"has just been assigned to you $rev");
+        fnMailAssignees(&$article, $user,'[Teamspace] New task:','has just been assigned to you');
     }else
     {
         fnMailAssignees(&$article, $user,'[Teamspace] Task updated:','has just been updated');
