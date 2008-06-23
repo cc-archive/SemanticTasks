@@ -2,31 +2,32 @@
 # (C) 2008 Steren Giannini
 # Licensed under the GNU GPLv2 (or later).
 
-function fnMailAssignees_new_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
-{
-    fnMailAssignees(&$article, $user,'[Teamspace] New task:','has just been assigned to you');
-    return TRUE;
-}
-
 function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
-    fnMailAssignees(&$article, $user,'[Teamspace] Task updated:','has just been updated');
+    //Get the revision count to determine if new article
+    $rev = $article->estimateRevisionCount();	
+
+    if($rev == 1)
+    {
+        fnMailAssignees(&$article, $user,'[Teamspace] New task:',"has just been assigned to you $rev");
+    }else
+    {
+        fnMailAssignees(&$article, $user,'[Teamspace] Task updated:','has just been updated');
+    }
     return TRUE;
 }
 
 function fnMailAssignees(&$article, &$user, $pre_title, $message)
 {
+    //We force here SMW to store the semantic data.
+    //Hooks are supposed to be executed in the order they are declared, but This is not the case here.
+    smwfSaveHook($article);
+
     $title = $article->getTitle();
     $subject = "$pre_title $title";
     $from = new MailAddress($user->getEmail(),$user->getName());
-
-    /*
-    the send() function of MediaWiki only send plain text
-    so we can't use the linker->makelinkObj() method to generate a html link.
-        $l = new Linker();
-        $link = $l->makeLinkObj($title);
-    */
-    $link = $title->getFullURL();
+    
+    $link = $title->escapeFullURL();   
 
     $query_string = "[[$title]][[assigned to::*]]";
     $results = st_get_query_results($query_string);
@@ -93,7 +94,7 @@ function fnRemindAssignees()
     {
         $task_name = $row[0]->getNextObject()->getTitle();
         $subject = "[Teamspace] Reminder: $task_name";
-        $link = $task_name->getFullURL();
+        $link = $task_name->escapeFullURL();
 
         $target_date = $row[3]->getNextObject();
         $tg_date = new DateTime($target_date->getShortHTMLText());
@@ -123,8 +124,6 @@ function fnRemindAssignees()
     return TRUE;
 }
 
-$wgHooks['ArticleInsertComplete'][] = 'fnMailAssignees_new_task';
 $wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';
-
 
 ?>
