@@ -19,11 +19,6 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
 function fnMailAssignees(&$article, &$user, $pre_title, $message)
 {
-    //This is for test
-    // TODO : remove
-    $me = new MailAddress("steren.giannini@gmail.com","Moi");
-
-
     //We force here SMW to store the semantic data.
     //Hooks are supposed to be executed in the order they are declared, but This is not the case here.
     smwfSaveHook($article);
@@ -55,8 +50,7 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
         if ($assignee->getID() != $user->getID())
         {
             $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
-//TODO : remove                  $user_mailer->send( $assignee_mail, $from, $subject, $body );
-            $user_mailer->send( $me, $from, $subject, $body );
+            $user_mailer->send( $assignee_mail, $from, $subject, $body );
         }
     }
 
@@ -95,9 +89,6 @@ function fnRemindAssignees()
     $results = st_get_query_results($query_string);
 
     $sender = new MailAddress("no-reply@creativecommons.org","Teamspace");
-    //This is for test
-    // TODO : remove
-    $me = new MailAddress("steren.giannini@gmail.com","Moi");
 
     while ($row = $results->getNext())
     {
@@ -127,9 +118,8 @@ function fnRemindAssignees()
 
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
-                    $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link" . " Date " . $date->format('F d Y') . " Target date : " . $tg_date->format('F d Y');
-//TODO : remove                    $user_mailer->send( $assignee_mail, $sender, $subject, $body );
-                    $user_mailer->send( $me, $sender, $subject, $body );
+                    $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link";
+                    $user_mailer->send($assignee_mail, $sender, $subject, $body );
 
                 }        
             }            
