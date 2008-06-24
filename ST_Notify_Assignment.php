@@ -124,7 +124,7 @@ function fnRemindAssignees()
 
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
-                    $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link" . " " . $date->format('F d Y') . " " . $tg_date->format('F d Y');
+                    $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link" . " Date " . $date->format('F d Y') . " Target date : " . $tg_date->format('F d Y');
 //TODO : remove                    $user_mailer->send( $assignee_mail, $sender, $subject, $body );
                     $user_mailer->send( $me, $sender, $subject, $body );
 
