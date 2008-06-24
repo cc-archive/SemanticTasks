@@ -24,6 +24,9 @@ $wgExtensionCredits['parserhook'][] = array(
        'description' => 'Email notifications for assigned or updated tasks.'
        );
 
+//Do st_SetupExtension after the mediawiki setup, AND after SemanticMediaWiki setup
+$wgExtensionFunctions[] = 'st_SetupExtension';
+
 # ST_Notify_Assignment.php
 require_once($stIP . "/ST_Notify_Assignment.php");
 

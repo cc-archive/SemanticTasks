@@ -19,10 +19,6 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
 function fnMailAssignees(&$article, &$user, $pre_title, $message)
 {
-    //We force here SMW to store the semantic data.
-    //Hooks are supposed to be executed in the order they are declared, but This is not the case here.
-    smwfSaveHook($article);
-
     $title = $article->getTitle();
     $subject = "$pre_title $title";
     $from = new MailAddress($user->getEmail(),$user->getName());
@@ -85,7 +81,7 @@ function fnRemindAssignees()
     $t = getdate();
     $today = date('F d Y',$t[0]);
 
-    $query_string = "[[Reminder at::+]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
+    $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
 
     $sender = new MailAddress("no-reply@creativecommons.org","Teamspace");
@@ -128,6 +124,11 @@ function fnRemindAssignees()
     return TRUE;
 }
 
-$wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';
+function st_SetupExtension()
+{
+    global $wgHooks;
+    $wgHooks['ArticleSaveComplete'][] = 'fnMailAssignees_updated_task';
+    return true;
+}
 
 ?>
