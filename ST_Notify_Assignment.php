@@ -114,7 +114,7 @@ function fnRemindAssignees()
             $date = new DateTime($today);
             $date->modify("+$remind_me_in day");
 
-            if($tg_date == $date)
+            if($tg_date-> format('F d Y') == $date-> format('F d Y') )
             {
                 while ($task_assignee = $row[2]->getNextObject())
                 {

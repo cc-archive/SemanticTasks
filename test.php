@@ -11,7 +11,7 @@
     $date->modify("+$remind_me_in day");
     echo "Today + 2 days " . $date-> format('F d Y') . "\n";
 
-    $target_date = new DateTime('19 June 2008');
+    $target_date = new DateTime('25 June 2008');
     echo "Target date " . $target_date-> format('F d Y') . "\n";
 
     if($date-> format('F d Y') == $target_date-> format('F d Y')) echo "good !\n";
