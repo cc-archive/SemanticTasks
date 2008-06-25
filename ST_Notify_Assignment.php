@@ -119,11 +119,7 @@ function fnRemindAssignees($wiki_url)
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
                     $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link";
-                    #TODO : remove this test
-                    $me = new MailAddress('steren.giannini@gmail.com','Steren Giannini');
-                    $user_mailer->send($me, $sender, $subject, $body );
-                    //$user_mailer->send($assignee_mail, $sender, $subject, $body );
-
+                    $user_mailer->send($assignee_mail, $sender, $subject, $body );
                 }        
             }            
         }
