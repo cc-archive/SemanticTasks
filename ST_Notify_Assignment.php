@@ -76,9 +76,9 @@ function st_get_query_results(&$query_string)
 }
 
 
-function fnRemindAssignees()
+function fnRemindAssignees($wiki_url)
 {
-    global $wgSitename, $wgServer, $wgServerName;
+    global $wgSitename, $wgServer;
 
     $user_mailer = new UserMailer();
 
@@ -94,10 +94,10 @@ function fnRemindAssignees()
     {
         $task_name = $row[0]->getNextObject()->getTitle();
         $subject = "[$wgSitename] Reminder: $task_name";
-        //The following doesn't work because we use a cron job.        
+        //The following doesn't work, maybe because we use a cron job.        
         //$link = $task_name->escapeFullURL();
         //So let's do it manually
-        $link = $wgServer . '/' . $task_name->getPartialURL();
+        $link = $wiki_url . $task_name->getPartialURL();
 
         $target_date = $row[3]->getNextObject();
         $tg_date = new DateTime($target_date->getShortHTMLText());

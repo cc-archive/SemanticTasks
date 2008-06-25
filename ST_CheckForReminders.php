@@ -12,7 +12,7 @@ global $stIP;
 require_once($stIP . '/ST_Notify_Assignment.php');
 
 //Let's send reminders
-fnRemindAssignees();
+fnRemindAssignees('http://teamspace.creativecommons.org/');
 
 print("ST check for reminders\n");
 ?>
