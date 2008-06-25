@@ -4,15 +4,17 @@
 
 function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
+    global $wgSitename;
+
     //Get the revision count to determine if new article
     $rev = $article->estimateRevisionCount();	
 
     if($rev == 1)
     {
-        fnMailAssignees(&$article, $user,'[Teamspace] New task:','has just been assigned to you');
+        fnMailAssignees(&$article, $user,"[$wgSitename] New task:",'has just been assigned to you');
     }else
     {
-        fnMailAssignees(&$article, $user,'[Teamspace] Task updated:','has just been updated');
+        fnMailAssignees(&$article, $user,"[$wgSitename] Task updated:",'has just been updated');
     }
     return TRUE;
 }
@@ -76,6 +78,8 @@ function st_get_query_results(&$query_string)
 
 function fnRemindAssignees()
 {
+    global $wgSitename, $wgServer, $wgServerName;
+
     $user_mailer = new UserMailer();
 
     $t = getdate();
@@ -84,16 +88,16 @@ function fnRemindAssignees()
     $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
 
-    $sender = new MailAddress("no-reply@creativecommons.org","Teamspace");
+    $sender = new MailAddress("no-reply@$wgServerName","$wgSitename");
 
     while ($row = $results->getNext())
     {
         $task_name = $row[0]->getNextObject()->getTitle();
-        $subject = "[Teamspace] Reminder: $task_name";
+        $subject = "[$wgSitename] Reminder: $task_name";
         //The following doesn't work because we use a cron job.        
         //$link = $task_name->escapeFullURL();
         //So let's do it manually
-        $link = "http://teamspace.creativecommons.org/" . $task_name->getPartialURL();
+        $link = $wgServer . '/' . $task_name->getPartialURL();
 
         $target_date = $row[3]->getNextObject();
         $tg_date = new DateTime($target_date->getShortHTMLText());
@@ -115,7 +119,10 @@ function fnRemindAssignees()
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
                     $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link";
-                    $user_mailer->send($assignee_mail, $sender, $subject, $body );
+                    #TODO : remove this test
+                    $me = new MailAddress('steren.giannini@gmail.com','Steren Giannini');
+                    $user_mailer->send($me, $sender, $subject, $body );
+                    //$user_mailer->send($assignee_mail, $sender, $subject, $body );
 
                 }        
             }            
