@@ -27,7 +27,11 @@ $wgExtensionCredits['parserhook'][] = array(
 //Do st_SetupExtension after the mediawiki setup, AND after SemanticMediaWiki setup
 $wgExtensionFunctions[] = 'st_SetupExtension';
 
-# ST_Notify_Assignment.php
+//i18n
+$wgExtensionMessagesFiles['SemanticTasks'] = dirname( __FILE__ ) . '/SemanticTasks.i18n.php';
+
+
+// ST_Notify_Assignment.php
 require_once($stIP . "/ST_Notify_Assignment.php");
 
 ?>

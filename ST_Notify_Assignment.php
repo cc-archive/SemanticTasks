@@ -4,6 +4,10 @@
 
 function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
+    //i18n
+    wfLoadExtensionMessages( 'SemanticTasks' );
+
+    //Grab the wiki name
     global $wgSitename;
 
     //Get the revision count to determine if new article
@@ -11,10 +15,10 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
     if($rev == 1)
     {
-        fnMailAssignees(&$article, $user,"[$wgSitename] New task:",'has just been assigned to you');
+        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg' );
     }else
     {
-        fnMailAssignees(&$article, $user,"[$wgSitename] Task updated:",'has just been updated');
+        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg' );
     }
     return TRUE;
 }
@@ -41,7 +45,7 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
         $assignee_username = $task_assignee->getTitle();
         $assignee_user_name = explode(":",$assignee_username);
         $assignee_name = $assignee_user_name[1];
-        $body = "Hello $assignee_name, \nThe task \"$title\" $message.\n\n$link";
+        $body = wfMsg($message , $assignee_name , $title) . $link;
 
         $assignee = User::newFromName($assignee_name);
 
@@ -57,6 +61,9 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
 
 function st_get_query_results(&$query_string)
 {
+    //i18n
+    wfLoadExtensionMessages( 'SemanticTasks' );
+
     //We use the Semantic Media Wiki Processor
     global $smwgIP;
     include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
@@ -93,7 +100,7 @@ function fnRemindAssignees($wiki_url)
     while ($row = $results->getNext())
     {
         $task_name = $row[0]->getNextObject()->getTitle();
-        $subject = "[$wgSitename] Reminder: $task_name";
+        $subject = '['.$wgSitename.'] '.wfMsg('reminder').$task_name;
         //The following doesn't work, maybe because we use a cron job.        
         //$link = $task_name->escapeFullURL();
         //So let's do it manually
@@ -118,7 +125,7 @@ function fnRemindAssignees($wiki_url)
 
                     $assignee = User::newFromName($assignee_name);
                     $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
-                    $body = "Hello $assignee_name, \nJust to remind you that the task \"$task_name\" ends in $remind_me_in days.\n\n$link";
+                    $body = wfMsg('reminder-message' , $assignee_name , $task_name , $remind_me_in , $link);
                     $user_mailer->send($assignee_mail, $sender, $subject, $body );
                 }        
             }            
