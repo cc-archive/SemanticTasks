@@ -15,15 +15,15 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
     if($rev == 1)
     {
-        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg' );
+        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg', /*diff?*/ false );
     }else
     {
-        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg' );
+        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg', /*diff?*/ true );
     }
     return TRUE;
 }
 
-function fnMailAssignees(&$article, &$user, $pre_title, $message)
+function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff)
 {
     $title = $article->getTitle();
     $subject = "$pre_title $title";
@@ -40,12 +40,32 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message)
 
     $user_mailer = new UserMailer();
 
+    if($display_diff)
+    {
+        //here we generate a diff
+        $revision = Revision::newFromTitle ($title,0);
+        $diff = new DifferenceEngine($title,$revision->getId(),'prev');
+        //The getDiffBody() method generates html, so let's generate the txt diff manualy:
+            global $wgContLang;
+            $diff->loadText();
+        	$otext = str_replace( "\r\n", "\n", $diff->mOldtext );
+        	$ntext = str_replace( "\r\n", "\n", $diff->mNewtext );
+            $ota = explode( "\n", $wgContLang->segmentForDiff( $otext ) );
+        	$nta = explode( "\n", $wgContLang->segmentForDiff( $ntext ) );
+            //We use here the php diff engine included in MediaWiki 
+        	$diffs = new Diff( $ota, $nta );
+            //And we ask for a txt formatted diff
+            $formatter = new UnifiedDiffFormatter();		
+            $diff_text = $wgContLang->unsegmentForDiff( $formatter->format( $diffs ) );
+    }
+
     while ($task_assignee = $task_assignees->getNextObject())
     {
         $assignee_username = $task_assignee->getTitle();
         $assignee_user_name = explode(":",$assignee_username);
         $assignee_name = $assignee_user_name[1];
         $body = wfMsg($message , $assignee_name , $title) . $link;
+        if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . $diff_text; }
 
         $assignee = User::newFromName($assignee_name);
 

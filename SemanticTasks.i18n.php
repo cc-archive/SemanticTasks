@@ -7,6 +7,7 @@ $messages['en'] = array(
     'updatedtoyou_msg' => "Hello $1,\nThe task \"$2\" has just been updated.\n\n",
     'reminder' => 'Reminder: ',
     'reminder-message' => "Hello $1, \nJust to remind you that the task \"$2\" ends in $3 days.\n\n$4",
+    'diff-message' => "Here are the differences :",
 );
 
 
@@ -17,6 +18,7 @@ $messages['fr'] = array(
     'updatedtoyou_msg' => "Bonjour $1,\nLa tâche \"$2\" a été mise à jour.\n\n",
     'reminder' => 'Rappel: ',
     'reminder-message' => "Bonjour $1, \nN'oubliez pas que la tâche \"$2\" se termine dans $3 jours.\n\n$4",
+    'diff-message' => "Les différences sont listées ci-dessous :",
 );
 
 ?>
