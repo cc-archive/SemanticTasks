@@ -37,7 +37,8 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff)
     {
         $task_assignees = $row[0];
     }
-
+    if( $task_assignees == '' ) { return FALSE; }
+    
     $user_mailer = new UserMailer();
 
     if($display_diff)
@@ -114,6 +115,7 @@ function fnRemindAssignees($wiki_url)
 
     $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
+    if( $task_assignees == '' ) { return FALSE; }
 
     $sender = new MailAddress("no-reply@$wgServerName","$wgSitename");
 
