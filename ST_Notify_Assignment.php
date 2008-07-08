@@ -115,7 +115,7 @@ function fnRemindAssignees($wiki_url)
 
     $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
-    if( $task_assignees == '' ) { return FALSE; }
+    if( $results == '' ) { return FALSE; }
 
     $sender = new MailAddress("no-reply@$wgServerName","$wgSitename");
 
