@@ -31,14 +31,17 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff,
     
     $link = $title->escapeFullURL();   
 
-    $query_string = "[[$title]][[assigned to::*]]";
+    $query_string = "[[$title]][[Assigned to::+]] | ?Assigned to";
     $results = st_get_query_results($query_string);
+
+    $task_assignees = array();
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
     }
-    if( $task_assignees == '' ) { mail('steren.giannini@gmail.com','nop','rien trouve');  return FALSE; }
-    
+
+    if( $task_assignees == '' ) { return FALSE; }
+
     $user_mailer = new UserMailer();
 
     while ($task_assignee = $task_assignees->getNextObject())
@@ -49,6 +52,10 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff,
         $body = wfMsg($message , $assignee_name , $title) . $link;
         if($display_text){ $body .= "\n \n". wfMsg('text-message') . "\n" . $article->getContent() ; }
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
+
+        //This is a test
+        //$count = $results->getCount();
+        //mail('steren.giannini@gmail.com','ok',"$count assignee name : $assignee_username");
 
         $assignee = User::newFromName($assignee_name);
 
@@ -83,16 +90,10 @@ function st_generateDiffBody_txt($title)
 }
 
 
-function st_get_query_results(&$query_string)
+function st_get_query_results($query_string)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
-
-    //We use the Semantic Media Wiki Processor
-    global $smwgIP;
-    include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
-
-    $task_assignees = array();
 
     $params = array();
     $inline = true;
