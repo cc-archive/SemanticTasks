@@ -31,7 +31,9 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff,
     
     $link = $title->escapeFullURL();   
 
-    $query_string = "[[$title]][[Assigned to::+]] | ?Assigned to";
+    //$query_string = "[[$title]][[Assigned to::+]] | ?Assigned to";
+    //$query_string = "[[$title]][[Assigned to::+]][[Assigned to::*]] OR [[$title]][[Carbon copy::+]][[Carbon copy::*]]";
+    $query_string = "[[$title]][[Assigned to::+]][[Assigned to::*]]";
     $results = st_get_query_results($query_string);
 
     $task_assignees = array();
@@ -90,10 +92,14 @@ function st_generateDiffBody_txt($title)
 }
 
 
-function st_get_query_results($query_string)
+function st_get_query_results(&$query_string)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
+
+    //We use the Semantic Media Wiki Processor
+    global $smwgIP;
+    include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
 
     $params = array();
     $inline = true;
