@@ -2,7 +2,7 @@
 # (C) 2008 Steren Giannini
 # Licensed under the GNU GPLv2 (or later).
 
-function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
+function fnMailAssignees_updated_task(&$article, &$current_user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
@@ -15,10 +15,10 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
 
     if($rev == 1)
     {
-        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg', /*diff?*/ false , /*Page text*/ true);
+        fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg', /*diff?*/ false , /*Page text*/ true);
     }else
     {
-        fnMailAssignees(&$article, $user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg', /*diff?*/ true , /*Page text*/ false );
+        fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg', /*diff?*/ true , /*Page text*/ false );
     }
     return TRUE;
 }
@@ -27,25 +27,23 @@ function fnMailAssignees($article, $user, $pre_title, $message, $display_diff, $
 {
     $title = $article->getTitle();
 
-    fnMailNotification("[[$title]][[Carbon copy::+]] | ?Carbon copy", $article, $user, $pre_title, $message . 'cc', $display_diff, $display_text);
-    
-    fnMailNotification("[[$title]][[Assigned to::+]] | ?Assigned to", $article, $user, $pre_title, $message . 'assigned', $display_diff, $display_text);
+    fnMailNotification('Carbon copy', $article, $user, $pre_title, $message, $display_diff, $display_text);
+    fnMailNotification('Assigned to', $article, $user, $pre_title, $message, $display_diff, $display_text);
 
     return TRUE;
 }
 
-function fnMailNotification($query_string, $article, $user, $pre_title, $message, $display_diff, $display_text)
+function fnMailNotification($query_word, $article, $user, $pre_title, $message, $display_diff, $display_text)
 {
+    $title = $article->getTitle();
 
-    $results= st_get_query_results($query_string);
+    $results= st_get_query_results($title,$query_word);
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
     }
 
     if( empty($task_assignees) ) { return FALSE; }
-
-    $title = $article->getTitle();
 
     $subject = "$pre_title $title";
     $from = new MailAddress($user->getEmail(),$user->getName());
@@ -64,11 +62,15 @@ function fnMailNotification($query_string, $article, $user, $pre_title, $message
 
         $assignee = User::newFromName($assignee_name);
 
+        //test
+        $body .= 'assignee ID' . $assignee->getID() . 'userID' .$user->getID();
+
         if ($assignee->getID() != $user->getID())
         {
             $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
             $user_mailer->send( $assignee_mail, $from, $subject, $body );
         }
+        $assignee = NULL;
     }
 
     return TRUE;
@@ -95,7 +97,7 @@ function st_generateDiffBody_txt($title)
 }
 
 
-function st_get_query_results($query_string)
+function st_get_query_results($title,$query_word)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
@@ -106,11 +108,12 @@ function st_get_query_results($query_string)
 
 
     //Thank you Yaron Koren for this piece of code.
+    $query_string = "[[$title]][[$query_word::+]] | ?$query_word";
     $params = array();
     $inline = true;
     $format = 'auto';
     $printlabel = "";        
-    $printouts[] = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText('Assigned to', SMW_NS_PROPERTY));
+    $printouts[] = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText($query_word, SMW_NS_PROPERTY));
 
     $query  = SMWQueryProcessor::createQuery($query_string, $params, $inline, $format, $printouts);        
     $results = smwfGetStore()->getQueryResult($query);
@@ -130,7 +133,7 @@ function fnRemindAssignees($wiki_url)
 
     $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
     $results = st_get_query_results($query_string);
-    if( $results == '' ) { return FALSE; }
+    if( empty($results) ) { return FALSE; }
 
     $sender = new MailAddress("no-reply@$wgServerName","$wgSitename");
 

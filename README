@@ -10,7 +10,7 @@ Semantic Tasks was written by Steren Giannini for CreativeCommons.
 
 == Manual ==
 
-* Notification emails are sent when a page is saved. The system looks for the [[Assigned to::*]] property.
+* Notification emails are sent when a page is saved. The system looks for the [[Assigned to::*]] and the [[Carbon copy::*]] property.
 
 * Reminders emails. The system looks for the [[Reminder at::*]] and the [[Target date::*]] property. It then send reminders to the assignees.
 You must run a cron job once a day to execute the reminder script:
