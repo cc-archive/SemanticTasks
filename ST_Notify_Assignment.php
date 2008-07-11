@@ -1,7 +1,6 @@
 <?php
 # (C) 2008 Steren Giannini
 # Licensed under the GNU GPLv2 (or later).
-
 function fnMailAssignees_updated_task(&$article, &$current_user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
     //i18n
@@ -27,22 +26,31 @@ function fnMailAssignees($article, $user, $pre_title, $message, $display_diff, $
 {
     $title = $article->getTitle();
 
-    fnMailNotification('Carbon copy', $article, $user, $pre_title, $message, $display_diff, $display_text);
+    //Send notifications to assignees and ccs
     fnMailNotification('Assigned to', $article, $user, $pre_title, $message, $display_diff, $display_text);
+    fnMailNotification('Carbon copy', $article, $user, $pre_title, $message, $display_diff, $display_text);
 
     return TRUE;
 }
 
+/**
+* Sends mail notifications 
+* @param $query_word String: the property that designate the users to notify.
+*/
 function fnMailNotification($query_word, $article, $user, $pre_title, $message, $display_diff, $display_text)
 {
     $title = $article->getTitle();
 
+    //get the result of the query "[[$title]][[$query_word::+]] | ?$query_word"
     $results= st_get_query_results($title,$query_word);
+
+    //In theory, there is only one row
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
     }
 
+    //If not any row, do nothing
     if( empty($task_assignees) ) { return FALSE; }
 
     $subject = "$pre_title $title";
@@ -61,22 +69,23 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
 
         $assignee = User::newFromName($assignee_name);
-
-        //test
-        $body .= 'assignee ID' . $assignee->getID() . 'userID' .$user->getID();
-
+        
+        //if assignee is the current user, do nothing
         if ($assignee->getID() != $user->getID())
         {
             $assignee_mail = new MailAddress($assignee->getEmail(),$assignee_name);
             $user_mailer->send( $assignee_mail, $from, $subject, $body );
         }
-        $assignee = NULL;
     }
 
     return TRUE;
 }
 
-
+/**
+* Generates a diff txt 
+* @param Title $title
+* @return string 
+*/
 function st_generateDiffBody_txt($title)
 {
     $revision = Revision::newFromTitle ($title,0);
