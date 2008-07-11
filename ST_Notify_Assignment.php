@@ -23,26 +23,33 @@ function fnMailAssignees_updated_task(&$article, &$user, &$text, &$summary, &$mi
     return TRUE;
 }
 
-function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff, $display_text)
+function fnMailAssignees($article, $user, $pre_title, $message, $display_diff, $display_text)
 {
     $title = $article->getTitle();
-    $subject = "$pre_title $title";
-    $from = new MailAddress($user->getEmail(),$user->getName());
+
+    fnMailNotification("[[$title]][[Carbon copy::+]] | ?Carbon copy", $article, $user, $pre_title, $message . 'cc', $display_diff, $display_text);
     
-    $link = $title->escapeFullURL();   
+    fnMailNotification("[[$title]][[Assigned to::+]] | ?Assigned to", $article, $user, $pre_title, $message . 'assigned', $display_diff, $display_text);
 
-    //$query_string = "[[$title]][[Assigned to::+]] | ?Assigned to";
-    //$query_string = "[[$title]][[Assigned to::+]][[Assigned to::*]] OR [[$title]][[Carbon copy::+]][[Carbon copy::*]]";
-    $query_string = "[[$title]][[Assigned to::+]][[Assigned to::*]]";
-    $results = st_get_query_results($query_string);
+    return TRUE;
+}
 
-    $task_assignees = array();
+function fnMailNotification($query_string, $article, $user, $pre_title, $message, $display_diff, $display_text)
+{
+
+    $results= st_get_query_results($query_string);
     while ($row = $results->getNext())
     {
         $task_assignees = $row[0];
     }
 
-    if( $task_assignees == '' ) { return FALSE; }
+    if( empty($task_assignees) ) { return FALSE; }
+
+    $title = $article->getTitle();
+
+    $subject = "$pre_title $title";
+    $from = new MailAddress($user->getEmail(),$user->getName());
+    $link = $title->escapeFullURL();  
 
     $user_mailer = new UserMailer();
 
@@ -54,10 +61,6 @@ function fnMailAssignees(&$article, &$user, $pre_title, $message, $display_diff,
         $body = wfMsg($message , $assignee_name , $title) . $link;
         if($display_text){ $body .= "\n \n". wfMsg('text-message') . "\n" . $article->getContent() ; }
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
-
-        //This is a test
-        //$count = $results->getCount();
-        //mail('steren.giannini@gmail.com','ok',"$count assignee name : $assignee_username");
 
         $assignee = User::newFromName($assignee_name);
 
@@ -92,7 +95,7 @@ function st_generateDiffBody_txt($title)
 }
 
 
-function st_get_query_results(&$query_string)
+function st_get_query_results($query_string)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
@@ -101,11 +104,13 @@ function st_get_query_results(&$query_string)
     global $smwgIP;
     include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
 
+
+    //Thank you Yaron Koren for this piece of code.
     $params = array();
     $inline = true;
     $format = 'auto';
     $printlabel = "";        
-    $printouts[] = new SMWPrintRequest(SMW_PRINT_THIS, $printlabel);
+    $printouts[] = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText('Assigned to', SMW_NS_PROPERTY));
 
     $query  = SMWQueryProcessor::createQuery($query_string, $params, $inline, $format, $printouts);        
     $results = smwfGetStore()->getQueryResult($query);
