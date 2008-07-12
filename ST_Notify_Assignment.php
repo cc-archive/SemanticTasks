@@ -134,7 +134,7 @@ function st_get_query_results($query_string,$properties_to_display,$display_titl
     //add the page name to the printouts
     if($display_title)
     {
-        $to_push = new SMWPrintRequest(SMWPrintRequest::PRINT_PRINT_THIS, $printlabel);
+        $to_push = new SMWPrintRequest(SMWPrintRequest::PRINT_THIS, $printlabel);
         array_push($printouts, $to_push);
     }
     
