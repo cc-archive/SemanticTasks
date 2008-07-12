@@ -29,7 +29,6 @@ function fnMailAssignees($article, $user, $pre_title, $message, $display_diff, $
     //Send notifications to assignees and ccs
     fnMailNotification('Assigned to', $article, $user, $pre_title, $message, $display_diff, $display_text);
     fnMailNotification('Carbon copy', $article, $user, $pre_title, $message, $display_diff, $display_text);
-
     return TRUE;
 }
 
@@ -41,8 +40,10 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
 {
     $title = $article->getTitle();
 
-    //get the result of the query "[[$title]][[$query_word::+]] | ?$query_word"
-    $results= st_get_query_results($title,$query_word);
+    //get the result of the query "[[$title]][[$query_word::+]]"
+    $properties_to_display = array();
+    $properties_to_display[0] = $query_word;
+    $results= st_get_query_results("[[$title]][[$query_word::+]]", $properties_to_display);
 
     //In theory, there is only one row
     while ($row = $results->getNext())
@@ -68,6 +69,8 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
         if($display_text){ $body .= "\n \n". wfMsg('text-message') . "\n" . $article->getContent() ; }
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
 
+        //Test
+        //mail('steren.giannini@gmail.com','what hapen',$assignee_username);
         $assignee = User::newFromName($assignee_name);
         
         //if assignee is the current user, do nothing
@@ -105,8 +108,10 @@ function st_generateDiffBody_txt($title)
     return $diff_text;
 }
 
-
-function st_get_query_results($title,$query_word)
+/**
+*@param $properties_to_display array(): array of property names to display
+*/
+function st_get_query_results($query_string,$properties_to_display)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
@@ -115,15 +120,22 @@ function st_get_query_results($title,$query_word)
     global $smwgIP;
     include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
 
+    //TODO this is temp
+    $query_word = $properties_to_display;
 
     //Thank you Yaron Koren for this piece of code.
-    $query_string = "[[$title]][[$query_word::+]] | ?$query_word";
     $params = array();
     $inline = true;
     $format = 'auto';
-    $printlabel = "";        
-    $printouts[] = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText($query_word, SMW_NS_PROPERTY));
-
+    $printlabel = "";      
+    $printouts = array();
+    
+    foreach($properties_to_display as $property)
+        {
+            $to_push = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText($property, SMW_NS_PROPERTY));
+            array_push($printouts, $to_push);
+        }
+    
     $query  = SMWQueryProcessor::createQuery($query_string, $params, $inline, $format, $printouts);        
     $results = smwfGetStore()->getQueryResult($query);
 
