@@ -43,7 +43,7 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
     //get the result of the query "[[$title]][[$query_word::+]]"
     $properties_to_display = array();
     $properties_to_display[0] = $query_word;
-    $results= st_get_query_results("[[$title]][[$query_word::+]]", $properties_to_display);
+    $results= st_get_query_results("[[$title]][[$query_word::+]]", $properties_to_display, false);
 
     //In theory, there is only one row
     while ($row = $results->getNext())
@@ -109,9 +109,14 @@ function st_generateDiffBody_txt($title)
 }
 
 /**
-*@param $properties_to_display array(): array of property names to display
+* This function returns to results of a certain query
+* Thank you Yaron Koren for advices concerning this code
+* @param $query_string String : the query
+* @param $properties_to_display array(String): array of property names to display
+* @param $display_title Boolean : add the page title in the result
+* @return TODO
 */
-function st_get_query_results($query_string,$properties_to_display)
+function st_get_query_results($query_string,$properties_to_display,$display_title)
 {
     //i18n
     wfLoadExtensionMessages( 'SemanticTasks' );
@@ -120,16 +125,20 @@ function st_get_query_results($query_string,$properties_to_display)
     global $smwgIP;
     include_once($smwgIP . "/includes/SMW_QueryProcessor.php");
 
-    //TODO this is temp
-    $query_word = $properties_to_display;
-
-    //Thank you Yaron Koren for this piece of code.
     $params = array();
     $inline = true;
     $format = 'auto';
     $printlabel = "";      
     $printouts = array();
+
+    //add the page name to the printouts
+    if($display_title)
+    {
+        $to_push = new SMWPrintRequest(SMWPrintRequest::PRINT_PRINT_THIS, $printlabel);
+        array_push($printouts, $to_push);
+    }
     
+    //Push the properties to display in the printout array.
     foreach($properties_to_display as $property)
         {
             $to_push = new SMWPrintRequest(SMWPrintRequest::PRINT_PROP, $printlabel, Title::newFromText($property, SMW_NS_PROPERTY));
@@ -152,8 +161,10 @@ function fnRemindAssignees($wiki_url)
     $t = getdate();
     $today = date('F d Y',$t[0]);
 
-    $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]][[Reminder at::*]][[Assigned to::*]][[Target date::*]]";
-    $results = st_get_query_results($query_string);
+    $query_string = "[[Reminder at::+]][[Status::New||In Progress]][[Target date::> $today]]";
+    $properties_to_display = array('Reminder at', 'Assigned to', 'Target date');
+
+    $results = st_get_query_results($query_string, $properties_to_display, true);
     if( empty($results) ) { return FALSE; }
 
     $sender = new MailAddress("no-reply@$wgServerName","$wgSitename");
