@@ -3,22 +3,25 @@
 # Licensed under the GNU GPLv2 (or later).
 function fnMailAssignees_updated_task(&$article, &$current_user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, &$revision)
 {
-    //i18n
-    wfLoadExtensionMessages( 'SemanticTasks' );
-
-    //Grab the wiki name
-    global $wgSitename;
-
-    //Get the revision count to determine if new article
-    $rev = $article->estimateRevisionCount();	
-
-    if($rev == 1)
+    if ( !$minoredit )
     {
-        fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg', /*diff?*/ false , /*Page text*/ true);
-    }else
-    {
-        fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg', /*diff?*/ true , /*Page text*/ false );
-    }
+        //i18n
+        wfLoadExtensionMessages( 'SemanticTasks' );
+
+        //Grab the wiki name
+        global $wgSitename;
+
+        //Get the revision count to determine if new article
+        $rev = $article->estimateRevisionCount();	
+
+        if($rev == 1)
+        {
+            fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('newtask'), 'assignedtoyou_msg', /*diff?*/ false , /*Page text*/ true);
+        }else
+        {
+            fnMailAssignees(&$article, $current_user,'['.$wgSitename.'] '. wfMsg('taskupdated'), 'updatedtoyou_msg', /*diff?*/ true , /*Page text*/ false );
+        }
+    }    
     return TRUE;
 }
 
