@@ -72,10 +72,10 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
         if($display_text){ $body .= "\n \n". wfMsg('text-message') . "\n" . $article->getContent() ; }
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
 
-        //Test
-        //mail('steren.giannini@gmail.com','what hapen',$assignee_username);
+        //uncomment this for test mode (Writes body in testFile)
+        st_WriteTestFile($body);
+
         $assignee = User::newFromName($assignee_name);
-        
         //if assignee is the current user, do nothing
         if ($assignee->getID() != $user->getID())
         {
@@ -216,4 +216,16 @@ function st_SetupExtension()
     return true;
 }
 
+/**
+* This function is for test mode only, it write its argument in a specific file.
+* This file must be writable for the system and be at the roor of your wiki installation
+* @param $stringData String : to write
+*/
+function st_WriteTestFile($stringData)
+{
+    $testFile = "testFile.txt";
+    $fh = fopen($testFile, 'w') or die("can't open file");
+    fwrite($fh, $stringData);
+    fclose($fh);
+}
 ?>
