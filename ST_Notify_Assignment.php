@@ -72,8 +72,8 @@ function fnMailNotification($query_word, $article, $user, $pre_title, $message, 
         if($display_text){ $body .= "\n \n". wfMsg('text-message') . "\n" . $article->getContent() ; }
         if($display_diff){ $body .= "\n \n". wfMsg('diff-message') . "\n" . st_generateDiffBody_txt($title); }
 
-        //uncomment this for test mode (Writes body in testFile)
-        st_WriteTestFile($body);
+        //TEST: uncomment this for test mode (Writes body in testFile)
+        //st_WriteTestFile($body);
 
         $assignee = User::newFromName($assignee_name);
         //if assignee is the current user, do nothing
